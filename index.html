@@ -6,7 +6,12 @@
     <title>Manuales Cam Pro</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230F3C88' rx='22.5'/><path d='M25 35 h12 l5 -8 h16 l5 8 h12 a8 8 0 0 1 8 8 v24 a8 8 0 0 1 -8 8 h-50 a8 8 0 0 1 -8 -8 v-24 a8 8 0 0 1 8 -8 z' fill='none' stroke='white' stroke-width='6' stroke-linejoin='round'/><circle cx='50' cy='52' r='14' fill='none' stroke='white' stroke-width='6'/><circle cx='75' cy='43' r='3.5' fill='white'/></svg>">
+    <link rel="apple-touch-icon" id="apple-touch-icon">
+    <link rel="manifest" id="pwa-manifest">
     <meta name="theme-color" content="#F0F4F8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
         /* Bloqueo total de selección y arrastre táctil */
@@ -223,6 +228,9 @@
                     <button id="toggle-scanner-btn" class="icon-btn" onclick="app.toggleScanner(event)" style="flex-shrink: 0; background: var(--primary); color: white; border: none; box-shadow: 0 4px 10px rgba(15,60,136,0.2);">
                         <i class="fas fa-camera"></i>
                     </button>
+                    <button id="voice-input-btn" class="icon-btn" onclick="app.toggleVoiceInput(event)" title="Dictar código por voz" style="flex-shrink: 0; background: var(--primary); color: white; border: none; box-shadow: 0 4px 10px rgba(15,60,136,0.2);">
+                        <i class="fas fa-microphone"></i>
+                    </button>
                 </div>
                 
                 <div class="numpad-wrapper" id="numpad-wrapper">
@@ -325,6 +333,9 @@
                 <h2>Revisar Fotos</h2>
                 <p id="gallery-subtitle">0 fotos capturadas</p>
             </div>
+            <button class="icon-btn" onclick="app.goHomeFromGallery()" title="Inicio (Pausar sesión)">
+                <i class="fas fa-home"></i>
+            </button>
         </div>
 
         <div class="gallery-content">
@@ -424,6 +435,10 @@
                 this.scannedCode = null;
                 this.isScanning = false;
 
+                // Voice
+                this.recognition = null;
+                this.isListening = false;
+
                 // Zoom & Swipe
                 this.currentZoom = 1;
                 this.initialDistance = null;
@@ -438,6 +453,7 @@
             }
 
             async init() {
+                this.setupPWA();
                 await this.initDB();
                 this.loadInputsFromStorage();
                 this.setupZoomListeners();
@@ -445,6 +461,83 @@
                 
                 await this.checkAndRestorePendingSession();
                 this.renderPendingSessions();
+            }
+
+            setupPWA() {
+                try {
+                    const createIcon = (size) => {
+                        const c = document.createElement('canvas');
+                        c.width = size;
+                        c.height = size;
+                        const ctx = c.getContext('2d');
+                        ctx.scale(size / 100, size / 100);
+
+                        ctx.fillStyle = '#0F3C88';
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, 100, 100, 22.5);
+                        ctx.fill();
+
+                        ctx.strokeStyle = '#FFFFFF';
+                        ctx.lineWidth = 6;
+                        ctx.lineJoin = 'round';
+                        ctx.beginPath();
+                        ctx.moveTo(25, 35);
+                        ctx.lineTo(37, 35);
+                        ctx.lineTo(42, 27);
+                        ctx.lineTo(58, 27);
+                        ctx.lineTo(63, 35);
+                        ctx.lineTo(75, 35);
+                        ctx.arcTo(83, 35, 83, 43, 8);
+                        ctx.lineTo(83, 67);
+                        ctx.arcTo(83, 75, 75, 75, 8);
+                        ctx.lineTo(25, 75);
+                        ctx.arcTo(17, 75, 17, 67, 8);
+                        ctx.lineTo(17, 43);
+                        ctx.arcTo(17, 35, 25, 35, 8);
+                        ctx.closePath();
+                        ctx.stroke();
+
+                        ctx.beginPath();
+                        ctx.arc(50, 52, 14, 0, Math.PI * 2);
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.beginPath();
+                        ctx.arc(75, 43, 3.5, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        return c.toDataURL('image/png');
+                    };
+
+                    const icon192 = createIcon(192);
+                    const icon512 = createIcon(512);
+
+                    const appleIcon = document.getElementById('apple-touch-icon');
+                    if (appleIcon) appleIcon.href = icon192;
+
+                    const manifest = {
+                        name: 'Manuales Cam Pro',
+                        short_name: 'Manuales Cam',
+                        description: 'Registro Profesional de Evidencias',
+                        start_url: window.location.href.split('#')[0],
+                        scope: window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1),
+                        display: 'standalone',
+                        orientation: 'portrait',
+                        background_color: '#F0F4F8',
+                        theme_color: '#0F3C88',
+                        icons: [
+                            { src: icon192, sizes: '192x192', type: 'image/png', purpose: 'any' },
+                            { src: icon192, sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+                            { src: icon512, sizes: '512x512', type: 'image/png', purpose: 'any' },
+                            { src: icon512, sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+                        ]
+                    };
+
+                    const manifestEl = document.getElementById('pwa-manifest');
+                    if (manifestEl) {
+                        manifestEl.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
+                    }
+                } catch (e) {}
             }
 
             // --- AUDIO Y VIBRACIÓN (HAPTICS) ---
@@ -458,21 +551,73 @@
             playSound(type) {
                 try {
                     this.initAudio();
+                    const now = this.audioCtx.currentTime;
+
+                    if (type === 'shutter') {
+                        const bufferSize = Math.floor(this.audioCtx.sampleRate * 0.09);
+                        const noiseBuffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+                        const output = noiseBuffer.getChannelData(0);
+                        for (let i = 0; i < bufferSize; i++) {
+                            output[i] = Math.random() * 2 - 1;
+                        }
+
+                        // Apertura del obturador
+                        const noise1 = this.audioCtx.createBufferSource();
+                        noise1.buffer = noiseBuffer;
+                        const filter1 = this.audioCtx.createBiquadFilter();
+                        filter1.type = 'bandpass';
+                        filter1.frequency.setValueAtTime(1800, now);
+                        filter1.Q.setValueAtTime(1.4, now);
+                        const gain1 = this.audioCtx.createGain();
+                        gain1.gain.setValueAtTime(0.001, now);
+                        gain1.gain.linearRampToValueAtTime(0.45, now + 0.003);
+                        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.032);
+                        noise1.connect(filter1);
+                        filter1.connect(gain1);
+                        gain1.connect(this.audioCtx.destination);
+                        noise1.start(now);
+                        noise1.stop(now + 0.035);
+
+                        // Golpe mecánico sutil
+                        const thudOsc = this.audioCtx.createOscillator();
+                        const thudGain = this.audioCtx.createGain();
+                        thudOsc.type = 'triangle';
+                        thudOsc.frequency.setValueAtTime(160, now);
+                        thudOsc.frequency.exponentialRampToValueAtTime(55, now + 0.028);
+                        thudGain.gain.setValueAtTime(0.25, now);
+                        thudGain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+                        thudOsc.connect(thudGain);
+                        thudGain.connect(this.audioCtx.destination);
+                        thudOsc.start(now);
+                        thudOsc.stop(now + 0.032);
+
+                        // Cierre del obturador
+                        const noise2 = this.audioCtx.createBufferSource();
+                        noise2.buffer = noiseBuffer;
+                        const filter2 = this.audioCtx.createBiquadFilter();
+                        filter2.type = 'bandpass';
+                        filter2.frequency.setValueAtTime(2500, now + 0.048);
+                        filter2.Q.setValueAtTime(1.8, now + 0.048);
+                        const gain2 = this.audioCtx.createGain();
+                        gain2.gain.setValueAtTime(0.001, now + 0.048);
+                        gain2.gain.linearRampToValueAtTime(0.32, now + 0.052);
+                        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
+                        noise2.connect(filter2);
+                        filter2.connect(gain2);
+                        gain2.connect(this.audioCtx.destination);
+                        noise2.start(now + 0.048);
+                        noise2.stop(now + 0.088);
+
+                        if(navigator.vibrate) navigator.vibrate(80);
+                        return;
+                    }
+
                     const osc = this.audioCtx.createOscillator();
                     const gain = this.audioCtx.createGain();
                     osc.connect(gain);
                     gain.connect(this.audioCtx.destination);
-                    
-                    const now = this.audioCtx.currentTime;
-                    if (type === 'shutter') {
-                        osc.type = 'square';
-                        osc.frequency.setValueAtTime(150, now);
-                        osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
-                        gain.gain.setValueAtTime(0.1, now);
-                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                        osc.start(now); osc.stop(now + 0.1);
-                        if(navigator.vibrate) navigator.vibrate(80);
-                    } else if (type === 'click') {
+
+                    if (type === 'click') {
                         osc.type = 'sine';
                         osc.frequency.setValueAtTime(600, now);
                         gain.gain.setValueAtTime(0.05, now);
@@ -567,6 +712,232 @@
                 display.style.color = this.session.code ? 'var(--text-dark)' : '#DADCE0';
             }
 
+            // --- ENTRADA POR VOZ (8 DÍGITOS) ---
+            toggleVoiceInput(e) {
+                if (e) e.stopPropagation();
+                this.playSound('click');
+
+                if (this.isScanning) this.closeScanner();
+                document.getElementById('numpad-wrapper').classList.remove('open');
+
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    this.playSound('error');
+                    this.showToast('Dictado por voz no disponible en este navegador', 'error');
+                    return;
+                }
+
+                if (this.isListening) {
+                    this.stopVoiceInput();
+                } else {
+                    this.startVoiceInput(SpeechRecognition);
+                }
+            }
+
+            startVoiceInput(SpeechRecognition) {
+                const btn = document.getElementById('voice-input-btn');
+                this.isListening = true;
+                btn.style.background = 'var(--danger)';
+                btn.innerHTML = '<i class="fas fa-stop"></i>';
+                this.showToast('Escuchando números...');
+
+                try {
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.lang = 'es-PE';
+                    this.recognition.interimResults = true;
+                    this.recognition.maxAlternatives = 3;
+                    this.recognition.continuous = false;
+
+                    this.recognition.onresult = (event) => {
+                        let bestDigits = '';
+                        for (let i = 0; i < event.results.length; i++) {
+                            const res = event.results[i];
+                            let chosen = '';
+                            for (let a = 0; a < res.length; a++) {
+                                const candidate = this.parseSpokenNumbers(res[a].transcript);
+                                if (candidate.length > chosen.length) {
+                                    chosen = candidate;
+                                }
+                            }
+                            bestDigits += chosen;
+                        }
+                        const finalCode = bestDigits.slice(0, 8);
+                        if (finalCode.length > 0) {
+                            this.session.code = finalCode;
+                            this.updateCodeDisplay();
+                        }
+                        if (finalCode.length >= 8 && event.results[event.results.length - 1].isFinal) {
+                            this.stopVoiceInput();
+                        }
+                    };
+
+                    this.recognition.onerror = (event) => {
+                        if (event.error !== 'aborted') {
+                            this.playSound('error');
+                            this.showToast('No se pudo escuchar con claridad', 'error');
+                        }
+                        this.resetVoiceBtn();
+                    };
+
+                    this.recognition.onend = () => {
+                        if (this.isListening) {
+                            if (this.session.code.length > 0) {
+                                this.playSound('click');
+                                if (navigator.vibrate) navigator.vibrate([40, 40]);
+                            }
+                        }
+                        this.resetVoiceBtn();
+                    };
+
+                    this.recognition.start();
+                } catch (err) {
+                    this.resetVoiceBtn();
+                    this.showToast('Error al iniciar micrófono', 'error');
+                }
+            }
+
+            stopVoiceInput() {
+                this.isListening = false;
+                if (this.recognition) {
+                    try { this.recognition.stop(); } catch (e) {}
+                }
+                this.resetVoiceBtn();
+            }
+
+            resetVoiceBtn() {
+                this.isListening = false;
+                const btn = document.getElementById('voice-input-btn');
+                if (btn) {
+                    btn.style.background = 'var(--primary)';
+                    btn.innerHTML = '<i class="fas fa-microphone"></i>';
+                }
+            }
+
+            parseSpokenNumbers(text) {
+                const normalized = text
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[,.;:!?¿¡\-_/\\()]+/g, ' ')
+                    .trim();
+
+                if (!normalized) return '';
+
+                const units = {
+                    cero: 0, uno: 1, un: 1, una: 1, dos: 2, tres: 3, cuatro: 4,
+                    cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9
+                };
+                const teens = {
+                    diez: 10, once: 11, doce: 12, trece: 13, catorce: 14, quince: 15,
+                    dieciseis: 16, diecisiete: 17, dieciocho: 18, diecinueve: 19
+                };
+                const twenties = {
+                    veinte: 20, veintiuno: 21, veintiun: 21, veintidos: 22, veintitres: 23,
+                    veinticuatro: 24, veinticinco: 25, veintiseis: 26, veintisiete: 27,
+                    veintiocho: 28, veintinueve: 29
+                };
+                const tens = {
+                    treinta: 30, cuarenta: 40, cincuenta: 50, sesenta: 60,
+                    setenta: 70, ochenta: 80, noventa: 90
+                };
+                const hundreds = {
+                    cien: 100, ciento: 100, doscientos: 200, trescientos: 300,
+                    cuatrocientos: 400, quinientos: 500, seiscientos: 600,
+                    setecientos: 700, ochocientos: 800, novecientos: 900
+                };
+
+                const tokens = normalized.split(/\s+/);
+                let result = '';
+                let currentVal = null;
+                let hasConnector = false;
+
+                const flush = () => {
+                    if (currentVal !== null) {
+                        result += String(currentVal);
+                        currentVal = null;
+                    }
+                };
+
+                for (const token of tokens) {
+                    if (/^\d+$/.test(token)) {
+                        flush();
+                        result += token;
+                        hasConnector = false;
+                        continue;
+                    }
+
+                    if (token === 'y') {
+                        hasConnector = true;
+                        continue;
+                    }
+
+                    if (token in hundreds) {
+                        const v = hundreds[token];
+                        if (currentVal !== null && currentVal >= 1000 && currentVal % 1000 === 0) {
+                            currentVal += v;
+                        } else {
+                            flush();
+                            currentVal = v;
+                        }
+                        hasConnector = false;
+                        continue;
+                    }
+
+                    if (token in tens) {
+                        const v = tens[token];
+                        if (currentVal !== null && currentVal >= 100 && currentVal % 100 === 0) {
+                            currentVal += v;
+                        } else {
+                            flush();
+                            currentVal = v;
+                        }
+                        hasConnector = false;
+                        continue;
+                    }
+
+                    if (token in twenties || token in teens) {
+                        const v = twenties[token] ?? teens[token];
+                        if (currentVal !== null && currentVal >= 100 && currentVal % 100 === 0) {
+                            currentVal += v;
+                        } else {
+                            flush();
+                            currentVal = v;
+                        }
+                        hasConnector = false;
+                        continue;
+                    }
+
+                    if (token in units) {
+                        const v = units[token];
+                        if (hasConnector && currentVal !== null && (currentVal % 100) >= 20 && (currentVal % 10) === 0 && v > 0) {
+                            currentVal += v;
+                        } else if (!hasConnector && currentVal !== null && currentVal >= 100 && (currentVal % 100 === 0) && v > 0) {
+                            currentVal += v;
+                        } else {
+                            flush();
+                            currentVal = v;
+                        }
+                        hasConnector = false;
+                        continue;
+                    }
+
+                    if (token === 'mil') {
+                        if (currentVal === null || currentVal === 0) {
+                            currentVal = 1000;
+                        } else {
+                            currentVal *= 1000;
+                        }
+                        hasConnector = false;
+                        continue;
+                    }
+
+                    hasConnector = false;
+                }
+
+                flush();
+                return result.replace(/\D/g, '').slice(0, 8);
+            }
+
             // --- ESCÁNER INLINE CON MODO ENFOQUE ---
             async toggleScanner(e) {
                 if(e) e.stopPropagation();
@@ -577,6 +948,7 @@
                     return;
                 }
 
+                if (this.isListening) this.stopVoiceInput();
                 document.getElementById('numpad-wrapper').classList.remove('open');
                 this.isScanning = true;
 
@@ -901,7 +1273,7 @@
                         code: this.session.code,
                         type: this.session.type,
                         phrase: this.session.phrase,
-                        photos: this.photos.map(p => p.blob),
+                        photos: this.photos.filter(p => p.blob).map(p => p.blob),
                         date: Date.now()
                     };
                     const tx = this.db.transaction(['pending_sessions', 'photos'], 'readwrite');
@@ -969,6 +1341,7 @@
             // --- INICIO DE SESIÓN NUEVA ---
             async startSession(isHD) {
                 this.playSound('click');
+                if (this.isListening) this.stopVoiceInput();
                 if (this.session.code.length === 0) {
                     this.playSound('error');
                     this.showToast('Ingresa un código válido', 'error');
@@ -1354,6 +1727,30 @@
             backToCamera() { 
                 this.playSound('click');
                 this.openCameraView(); 
+            }
+
+            async goHomeFromGallery() {
+                this.playSound('click');
+                if (this.photos.length > 0) {
+                    const pendingCount = await this.getPendingCount();
+                    if (pendingCount >= 5) {
+                        this.playSound('error');
+                        this.showToast('Límite de 5 sesiones. Envía una antes de pausar otra.', 'error');
+                        return;
+                    }
+                    await this.savePendingSession();
+                    this.showToast('Sesión pausada en pantalla principal');
+                }
+
+                this.removeStorage('session_code');
+                this.removeStorage('session_type');
+                this.removeStorage('session_phrase');
+
+                document.getElementById('gallery-screen').style.display = 'none';
+                document.getElementById('login-screen').style.display = 'flex';
+                this.session.code = '';
+                this.updateCodeDisplay();
+                this.renderPendingSessions();
             }
 
             async executeShare() {
