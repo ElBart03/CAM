@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Manuales Cam Pro</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230F3C88' rx='22.5'/><path d='M25 35 h12 l5 -8 h16 l5 8 h12 a8 8 0 0 1 8 8 v24 a8 8 0 0 1 -8 8 h-50 a8 8 0 0 1 -8 -8 v-24 a8 8 0 0 1 8 -8 z' fill='none' stroke='white' stroke-width='6' stroke-linejoin='round'/><circle cx='50' cy='52' r='14' fill='none' stroke='white' stroke-width='6'/><circle cx='75' cy='43' r='3.5' fill='white'/></svg>">
+    <meta name="theme-color" content="#F0F4F8">
+
+    <style>
+        /* Bloqueo total de selección y arrastre táctil */
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+/Edge */
+            user-select: none; /* Standard */
+            -webkit-user-drag: none; /* Evita arrastrar imágenes/elementos */
+        }
+        
+        /* Rediseño Estilo Bancario (Profesional, sobrio, alto contraste) */
+        :root {
+            --primary: #0F3C88; /* Azul Marino Institucional */
+            --primary-dark: #0A2960;
+            --success: #1E8E3E; /* Verde Confirmación */
+            --success-dark: #145C27;
+            --danger: #D93025; /* Rojo Alerta */
+            --bg-light: #F0F4F8; /* Fondo gris/azulado muy limpio */
+            --text-dark: #202124;
+            --text-secondary: #5F6368;
+            --card-bg: #FFFFFF;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: var(--bg-light);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            overflow: hidden; 
+        }
+
+        /* ----- PANTALLA DE INICIO ----- */
+        #login-screen {
+            position: absolute; inset: 0;
+            background: var(--bg-light); /* Fondo sólido limpio */
+            z-index: 20; display: flex; flex-direction: column;
+            padding: 20px; overflow-y: auto;
+        }
+
+        .login-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand-icon { width: 44px; height: 44px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; box-shadow: 0 4px 10px rgba(15, 60, 136, 0.2); }
+        .brand-text h1 { margin: 0; font-size: 20px; font-weight: 700; color: var(--text-dark); letter-spacing: -0.3px; }
+        .brand-text span { font-size: 12px; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .header-actions { display: flex; gap: 10px; }
+        .icon-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.08); background: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--primary); font-size: 18px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); transition: 0.2s; }
+        .icon-btn:active { transform: scale(0.9); }
+
+        .main-card { background: var(--card-bg); border-radius: 16px; padding: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02); flex: 1; display: flex; flex-direction: column; gap: 20px; max-width: 400px; margin: 0 auto; width: 100%; border: 1px solid rgba(0,0,0,0.03); }
+        
+        .input-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; }
+        .input-field { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; width: 100%; padding: 14px 16px; font-size: 16px; border: 1px solid #DADCE0; border-radius: 10px; background: #FFF; outline: none; transition: all 0.2s; font-weight: 500; color: var(--text-dark); }
+        .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15, 60, 136, 0.1); }
+
+        /* Teclado Numérico Integrado Desplegable */
+        .numpad-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; opacity: 0; }
+        .numpad-wrapper.open { max-height: 300px; opacity: 1; margin-top: 10px; }
+        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .num-key { padding: 12px; font-size: 22px; font-weight: 600; border-radius: 10px; border: 1px solid #DADCE0; background: #FFF; color: var(--text-dark); cursor: pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.1s; }
+        .num-key:active { background: #E8EAED; transform: scale(0.95); }
+
+        .type-selector { display: flex; gap: 8px; background: #F8F9FA; padding: 4px; border-radius: 10px; border: 1px solid #DADCE0; }
+        .type-option { flex: 1; padding: 12px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; color: var(--text-secondary); border: none; background: transparent; transition: 0.2s; }
+        .type-option.active { background: var(--primary); color: white; box-shadow: 0 2px 6px rgba(15, 60, 136, 0.2); }
+
+        .primary-btn { flex: 1; padding: 16px 10px; border: none; background: var(--primary); color: white; font-size: 15px; font-weight: 600; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(15, 60, 136, 0.25); display: flex; align-items: center; justify-content: center; gap: 8px; letter-spacing: 0.3px; transition: 0.2s; }
+        .primary-btn:active { transform: scale(0.98); }
+
+        /* ----- ESCÁNER INLINE CON MODO ENFOQUE ----- */
+        #global-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 90; opacity: 0; transition: opacity 0.3s; }
+        #global-overlay.active { display: block; opacity: 1; }
+        
+        #scanner-flex-wrapper { display: flex; gap: 10px; align-items: center; transition: all 0.3s; border-radius: 10px; }
+        #scanner-flex-wrapper.scanner-active { position: relative; z-index: 95; }
+
+        #code-input-container { flex: 1; height: 50px; border: 1px solid #DADCE0; border-radius: 10px; background: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
+        #code-input-container.scanner-active { height: 120px; border-color: var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+        
+        .floating-scan-btn { display: none; position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 95; background: var(--primary); color: white; border: none; height: 64px; border-radius: 32px; padding: 0 32px; font-size: 16px; font-weight: bold; box-shadow: 0 8px 24px rgba(15,60,136,0.5); align-items: center; gap: 10px; transition: 0.2s; }
+        .floating-scan-btn:active { transform: translateX(-50%) scale(0.95); }
+        .floating-scan-btn.success { background: var(--success); box-shadow: 0 8px 24px rgba(30,142,62,0.5); }
+
+        /* ----- PANTALLA DE CÁMARA ----- */
+        #camera-app { display: none; position: fixed; inset: 0; background: black; z-index: 30; }
+        .camera-preview { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; touch-action: none; }
+        #video { width: 100%; height: 100%; object-fit: cover; }
+        .camera-overlay { position: absolute; inset: 0; pointer-events: none; }
+        
+        .camera-header { position: absolute; top: 0; left: 0; right: 0; padding: 40px 20px 20px; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); display: flex; justify-content: space-between; align-items: flex-start; z-index: 10; }
+        .camera-info { color: white; }
+        .camera-info .code { font-size: 22px; font-weight: 700; }
+        .camera-info .type { font-size: 12px; opacity: 0.8; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .camera-controls-top { display: flex; gap: 12px; }
+        .control-btn { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+        .control-btn.active { background: var(--primary); border-color: var(--primary); }
+
+        .camera-footer { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 20px; z-index: 10; display: flex; flex-direction: column; gap: 15px; }
+        
+        .thumbnails-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .thumb { min-width: 50px; width: 50px; height: 50px; border-radius: 8px; overflow: hidden; border: 2px solid white; position: relative; opacity: 0.8; cursor: pointer; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; }
+        .thumb img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .main-controls { display: flex; align-items: center; justify-content: space-between; padding-bottom: 20px; }
+        
+        .back-btn { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.15); border: none; color: white; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+
+        .shutter-btn { width: 74px; height: 74px; border-radius: 50%; background: transparent; border: 4px solid white; display: flex; align-items: center; justify-content: center; position: relative; margin-left: auto; margin-right: auto; }
+        .shutter-btn::after { content: ''; position: absolute; inset: 3px; background: white; border-radius: 50%; transition: 0.1s; }
+        .shutter-btn:active::after { transform: scale(0.85); }
+
+        .action-btn { width: 60px; height: 60px; border-radius: 50%; background: var(--success); border: none; color: white; font-size: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(30,142,62,0.4); transform: scale(1); transition: transform 0.2s; }
+        .action-btn:active { transform: scale(0.9); }
+        .action-btn:disabled { opacity: 0; pointer-events: none; }
+
+        /* ----- PANTALLA DE GALERÍA/RESUMEN ----- */
+        #gallery-screen { display: none; position: fixed; inset: 0; background: var(--bg-light); z-index: 40; flex-direction: column; }
+        
+        .gallery-header { background: white; padding: 40px 20px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; z-index: 2; border-bottom: 1px solid #E8EAED; }
+        .gallery-header h2 { margin: 0; font-size: 18px; color: var(--text-dark); font-weight: 700; }
+        .gallery-header p { margin: 4px 0 0 0; font-size: 13px; color: var(--text-secondary); }
+
+        .gallery-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 120px; }
+        
+        .summary-box { background: white; padding: 16px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #E8EAED; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+        .summary-box textarea { width: 100%; border: none; font-family: inherit; font-size: 14px; color: var(--text-dark); resize: none; background: transparent; outline: none; -webkit-user-select: text; user-select: text; font-weight: 500;}
+
+        .photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .photo-card { position: relative; border-radius: 10px; overflow: hidden; background: white; border: 1px solid #E8EAED; aspect-ratio: 3/4; cursor: pointer;}
+        .photo-card img { width: 100%; height: 100%; object-fit: cover; }
+        .delete-photo-btn { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; background: rgba(217, 48, 37, 0.9); color: white; border: none; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); backdrop-filter: blur(4px); }
+
+        .fab-container { position: fixed; bottom: 30px; left: 20px; right: 20px; display: flex; justify-content: space-between; pointer-events: none; z-index: 50; }
+        
+        .fab-btn { pointer-events: auto; height: 56px; border-radius: 28px; border: none; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; box-shadow: 0 6px 16px rgba(0,0,0,0.15); color: white; padding: 0 24px; gap: 10px; }
+        
+        .fab-back { background: var(--text-dark); }
+        .fab-share { background: var(--success); padding: 0 30px; }
+
+        /* ----- NUEVAS VISTAS (HISTORIAL Y VISOR) ----- */
+        .history-date-header { font-weight: 800; color: var(--primary); margin: 15px 0 8px; font-size: 14px; border-bottom: 2px solid var(--primary); padding-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .history-card { background: white; padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #E8EAED; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); cursor: pointer; transition: 0.2s; }
+        .history-card:active { background: #F8F9FA; transform: scale(0.98); }
+        .history-card.caso { background: #FEF2F2; border-color: #FCA5A5; }
+        .history-card strong { color: var(--primary); font-size: 16px; }
+        .history-card small { color: var(--text-secondary); font-size: 12px; display: block; margin-top: 4px; }
+        .history-badge { background: #E8F0FE; color: var(--primary); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+
+        /* UTILIDADES */
+        .flash-overlay { position: fixed; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 50; transition: opacity 0.1s; }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: #323232; color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; z-index: 300; opacity: 0; transition: all 0.3s; display: flex; align-items: center; gap: 10px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: none; align-items: center; justify-content: center; z-index: 400; flex-direction: column; gap: 20px; backdrop-filter: blur(5px); }
+        .loading-overlay.active { display: flex; }
+        .spinner { width: 40px; height: 40px; border: 3px solid #E8EAED; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .loading-text { color: var(--primary); font-weight: 600; font-size: 14px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- PANTALLA 1: INICIO/LOGIN -->
+    <div id="login-screen">
+        <!-- OVERLAY GLOBAL PARA MODO ENFOQUE (Dentro de login-screen para manejar z-index) -->
+        <div id="global-overlay" onclick="app.closeScanner()"></div>
+
+        <div class="login-header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="24" height="24" viewBox="0 0 100 100">
+                        <path d="M25 35 h12 l5 -8 h16 l5 8 h12 a8 8 0 0 1 8 8 v24 a8 8 0 0 1 -8 8 h-50 a8 8 0 0 1 -8 -8 v-24 a8 8 0 0 1 8 -8 z" fill="none" stroke="white" stroke-width="8" stroke-linejoin="round"/>
+                        <circle cx="50" cy="52" r="14" fill="none" stroke="white" stroke-width="8"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>Manuales Cam</h1>
+                    <span>Registro Profesional</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="app.openHistory()" title="Historial de Registros Enviados">
+                    <i class="fas fa-list-ul"></i>
+                </button>
+                <button class="icon-btn" onclick="app.confirmReset()" title="Resetear App">
+                    <i class="fas fa-trash-arrow-up"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="main-card">
+            <div class="input-group">
+                <label>Código de Pedido / Caso</label>
+                
+                <!-- WRAPPER PARA ELEVAR EL ESCÁNER SOBRE EL OVERLAY -->
+                <div id="scanner-flex-wrapper">
+                    <div id="code-input-container" onclick="app.handleInputClick(event)">
+                        <span id="code-display" style="font-size: 18px; font-weight: 600; color: #DADCE0; letter-spacing: 2px; position: relative; z-index: 1;">--------</span>
+                        
+                        <!-- Elementos de la cámara (Ocultos por defecto) -->
+                        <video id="mini-scanner-video" autoplay playsinline style="display: none; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 10px;"></video>
+                        <img id="scanner-frozen-img" style="display: none; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 10px; z-index: 2;">
+                        <div id="scanner-flash" style="display: none; position: absolute; inset: 0; background: white; border-radius: 10px; z-index: 3; opacity: 0; transition: opacity 0.1s;"></div>
+                        
+                        <!-- Guía visual para alinear -->
+                        <div id="scanner-guide" style="display: none; position: absolute; top: 50%; left: 10%; right: 10%; height: 40px; transform: translateY(-50%); border: 2px dashed rgba(255,255,255,0.6); border-radius: 8px; z-index: 4; pointer-events: none;"></div>
+                        
+                        <div id="scanner-overlay" style="display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.7); border-radius: 10px; color: white; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; letter-spacing: 3px; z-index: 5;"></div>
+                    </div>
+                    
+                    <button id="toggle-scanner-btn" class="icon-btn" onclick="app.toggleScanner(event)" style="flex-shrink: 0; background: var(--primary); color: white; border: none; box-shadow: 0 4px 10px rgba(15,60,136,0.2);">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+                
+                <div class="numpad-wrapper" id="numpad-wrapper">
+                    <div class="numpad" id="custom-numpad">
+                        <button class="num-key" onclick="app.typeDigit(1)">1</button>
+                        <button class="num-key" onclick="app.typeDigit(2)">2</button>
+                        <button class="num-key" onclick="app.typeDigit(3)">3</button>
+                        <button class="num-key" onclick="app.typeDigit(4)">4</button>
+                        <button class="num-key" onclick="app.typeDigit(5)">5</button>
+                        <button class="num-key" onclick="app.typeDigit(6)">6</button>
+                        <button class="num-key" onclick="app.typeDigit(7)">7</button>
+                        <button class="num-key" onclick="app.typeDigit(8)">8</button>
+                        <button class="num-key" onclick="app.typeDigit(9)">9</button>
+                        <button class="num-key" onclick="app.clearDigits()" style="color: var(--danger); font-weight: 800;">C</button>
+                        <button class="num-key" onclick="app.typeDigit(0)">0</button>
+                        <button class="num-key" onclick="app.deleteDigit()" style="color: var(--text-secondary);"><i class="fas fa-backspace"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Tipo de Registro</label>
+                <div class="type-selector">
+                    <button class="type-option active" onclick="app.selectType('Pedido', this)">Pedido</button>
+                    <button class="type-option" onclick="app.selectType('Caso', this)">Caso</button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Comentario de Entrega</label>
+                <input type="text" id="custom-phrase" class="input-field" value="entregado correctamente" placeholder="Frase personalizada">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: auto;">
+                <button class="primary-btn" style="background: #5F6368;" onclick="app.startSession(false)">
+                    <i class="fas fa-bolt"></i> Rápida (SD)
+                </button>
+                <button class="primary-btn" onclick="app.startSession(true)">
+                    <i class="fas fa-camera"></i> Normal (HD)
+                </button>
+            </div>
+        </div>
+
+        <div id="pending-sessions-list" style="max-width: 400px; margin: 20px auto 0; width: 100%; display: flex; flex-direction: column; gap: 10px;"></div>
+    </div>
+
+    <!-- BOTÓN FLOTANTE DEL ESCÁNER (PULGAR DERECHO/CENTRO) -->
+    <button id="floating-scan-btn" class="floating-scan-btn" onclick="app.executeScan()">
+        <i class="fas fa-camera"></i> Escanear
+    </button>
+
+    <!-- PANTALLA 2: CÁMARA -->
+    <div id="camera-app">
+        <div class="flash-overlay" id="flash-overlay"></div>
+        
+        <div class="camera-preview" id="camera-preview">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+        </div>
+
+        <div class="camera-header">
+            <div class="camera-info">
+                <div class="type" id="camera-type-display">PEDIDO</div>
+                <div class="code" id="camera-code-display">--------</div>
+            </div>
+            <div class="camera-controls-top">
+                <button class="control-btn" id="hd-btn" onclick="app.toggleHD()" title="Alta definición">
+                    <span style="font-size: 11px; font-weight: 800;">HD</span>
+                </button>
+                <button class="control-btn" id="flash-btn" onclick="app.toggleFlash()" title="Flash">
+                    <i class="fas fa-bolt" style="opacity:0.4"></i>
+                </button>
+                <button class="control-btn" onclick="app.flipCamera()" title="Cambiar cámara">
+                    <i class="fas fa-rotate"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="camera-footer">
+            <div class="thumbnails-container" id="camera-thumbnails"></div>
+            
+            <div class="main-controls">
+                <button class="back-btn" onclick="app.goHomeFromCamera()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                
+                <button class="shutter-btn" onclick="app.takePhoto()"></button>
+                
+                <button class="action-btn" id="to-gallery-btn" onclick="app.goToGallery()" disabled>
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA 3: GALERÍA Y COMPARTIR -->
+    <div id="gallery-screen">
+        <div class="gallery-header">
+            <div>
+                <h2>Revisar Fotos</h2>
+                <p id="gallery-subtitle">0 fotos capturadas</p>
+            </div>
+        </div>
+
+        <div class="gallery-content">
+            <div class="summary-box">
+                <label style="font-size: 11px; color: var(--primary); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block;">Mensaje a enviar</label>
+                <textarea id="review-message" rows="2"></textarea>
+            </div>
+
+            <div class="photo-grid" id="gallery-grid"></div>
+        </div>
+
+        <div class="fab-container">
+            <button class="fab-btn fab-share" onclick="app.executeShare()">
+                Compartir <i class="fab fa-whatsapp" style="font-size: 20px;"></i>
+            </button>
+            <button class="fab-btn fab-back" onclick="app.backToCamera()">
+                <i class="fas fa-camera"></i> Más
+            </button>
+        </div>
+    </div>
+
+    <!-- PANTALLA 4: HISTORIAL (ENVIADOS) -->
+    <div id="history-screen" style="display:none; position:fixed; inset:0; background:var(--bg-light); z-index:45; flex-direction:column;">
+        <div class="gallery-header">
+            <div>
+                <h2>Historial</h2>
+                <p>Registros enviados recientemente</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="icon-btn" onclick="app.selectDirectory(true)" title="Vincular Carpeta Local">
+                    <i class="fas fa-folder-tree"></i>
+                </button>
+                <button class="icon-btn" onclick="app.copySelectedCodes()" title="Copiar Seleccionados">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button class="icon-btn" onclick="app.closeHistory()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="gallery-content" id="history-list" style="padding-top: 5px;"></div>
+    </div>
+
+    <!-- MODAL DE FOTOS DEL HISTORIAL -->
+    <div id="history-photo-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:60; flex-direction:column; backdrop-filter:blur(4px);">
+        <div style="padding:20px; display:flex; justify-content:space-between; align-items:center; background:white; border-radius:0 0 16px 16px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+            <div>
+                <h3 id="modal-history-title" style="margin:0; color:var(--text-dark); font-size:18px;">Fotos</h3>
+                <p id="modal-history-subtitle" style="margin:4px 0 0 0; font-size:12px; color:var(--text-secondary);"></p>
+            </div>
+            <button onclick="app.closeHistoryModal()" class="icon-btn" style="background:#F0F4F8; border:none;"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="modal-history-grid" style="padding:20px; display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; overflow-y:auto; flex:1;"></div>
+    </div>
+
+    <!-- INYECCIÓN: VISOR PANTALLA COMPLETA SWIPE -->
+    <div id="fullscreen-viewer" style="display:none; position:fixed; inset:0; background:#000; z-index:999; flex-direction:column;">
+        <div style="padding: 30px 20px; display:flex; justify-content:space-between; align-items:center; z-index:1000; position:absolute; top:0; left:0; right:0; background:linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);">
+            <div style="color:white; font-weight:bold; font-size:16px;" id="fs-counter">1/1</div>
+            <button onclick="app.closeFullscreenViewer()" style="background:rgba(255,255,255,0.2); border:none; color:white; width:44px; height:44px; border-radius:50%; font-size:20px; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px);"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="fs-touch-area" style="flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; touch-action:none;">
+            <img id="fs-img" src="" style="max-width:100%; max-height:100%; object-fit:contain; transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);">
+        </div>
+    </div>
+
+    <!-- UI ELEMENTOS -->
+    <div class="loading-overlay" id="loading">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loading-text">Cargando...</div>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-circle-info"></i>
+        <span id="toast-message">Mensaje</span>
+    </div>
+
+    <script>
+        const APP_PREFIX = 'manualescam_';
+        const DB_NAME = 'ManualesCamDB_v7'; 
+        const DB_VERSION = 5;
+
+        class ManualesCamApp {
+            constructor() {
+                this.db = null;
+                this.stream = null;
+                this.photos = [];
+                this.facingMode = 'environment';
+                this.flashMode = 'off';
+                this.hdMode = false;
+                
+                this.dirHandle = null;
+                this.session = { code: '', type: 'Pedido', phrase: 'entregado correctamente' };
+                
+                // Scanner
+                this.scannerStream = null;
+                this.scannedCode = null;
+                this.isScanning = false;
+
+                // Zoom & Swipe
+                this.currentZoom = 1;
+                this.initialDistance = null;
+                this.fsUrls = [];
+                this.fsIndex = 0;
+                this.touchStartX = 0;
+
+                // Motor Sonido
+                this.audioCtx = null;
+
+                this.init();
+            }
+
+            async init() {
+                await this.initDB();
+                this.loadInputsFromStorage();
+                this.setupZoomListeners();
+                this.setupSwipeListeners();
+                
+                await this.checkAndRestorePendingSession();
+                this.renderPendingSessions();
+            }
+
+            // --- AUDIO Y VIBRACIÓN (HAPTICS) ---
+            initAudio() {
+                if (!this.audioCtx) {
+                    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+            }
+
+            playSound(type) {
+                try {
+                    this.initAudio();
+                    const osc = this.audioCtx.createOscillator();
+                    const gain = this.audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(this.audioCtx.destination);
+                    
+                    const now = this.audioCtx.currentTime;
+                    if (type === 'shutter') {
+                        osc.type = 'square';
+                        osc.frequency.setValueAtTime(150, now);
+                        osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+                        gain.gain.setValueAtTime(0.1, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                        osc.start(now); osc.stop(now + 0.1);
+                        if(navigator.vibrate) navigator.vibrate(80);
+                    } else if (type === 'click') {
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(600, now);
+                        gain.gain.setValueAtTime(0.05, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                        osc.start(now); osc.stop(now + 0.05);
+                    } else if (type === 'tiki') {
+                        osc.type = 'square';
+                        osc.frequency.setValueAtTime(800, now);
+                        osc.frequency.exponentialRampToValueAtTime(50, now + 0.02);
+                        gain.gain.setValueAtTime(0.05, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+                        osc.start(now); osc.stop(now + 0.02);
+                    } else if (type === 'error') {
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(200, now);
+                        gain.gain.setValueAtTime(0.1, now);
+                        gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                        osc.start(now); osc.stop(now + 0.2);
+                        if(navigator.vibrate) navigator.vibrate([50, 50, 50]);
+                    }
+                } catch(e) {}
+            }
+
+            // --- BASE DE DATOS Y ALMACENAMIENTO ---
+            async initDB() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => { this.db = request.result; resolve(); };
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains('photos')) db.createObjectStore('photos', { keyPath: 'id', autoIncrement: true });
+                        if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'id' });
+                        if (!db.objectStoreNames.contains('history')) db.createObjectStore('history', { keyPath: 'id', autoIncrement: true });
+                        if (!db.objectStoreNames.contains('pending_sessions')) db.createObjectStore('pending_sessions', { keyPath: 'id' });
+                    };
+                });
+            }
+
+            setStorage(key, value) { localStorage.setItem(APP_PREFIX + key, value); }
+            getStorage(key) { return localStorage.getItem(APP_PREFIX + key); }
+            removeStorage(key) { localStorage.removeItem(APP_PREFIX + key); }
+
+            loadInputsFromStorage() {
+                const type = this.getStorage('lastType') || 'Pedido';
+                const phrase = this.getStorage('lastPhrase') || 'entregado correctamente';
+
+                this.session.code = '';
+                this.updateCodeDisplay();
+                document.getElementById('custom-phrase').value = phrase;
+                this.selectType(type, Array.from(document.querySelectorAll('.type-option')).find(btn => btn.textContent === type));
+            }
+
+            // --- TECLADO NUMÉRICO INTEGRADO ---
+            handleInputClick(e) {
+                if (this.isScanning) return; 
+                this.toggleNumpad();
+            }
+
+            toggleNumpad() {
+                this.playSound('click');
+                const wrapper = document.getElementById('numpad-wrapper');
+                wrapper.classList.toggle('open');
+            }
+
+            typeDigit(d) {
+                this.playSound('tiki');
+                if(navigator.vibrate) navigator.vibrate(40);
+                if (this.session.code.length < 8) {
+                    this.session.code += d;
+                    this.updateCodeDisplay();
+                }
+            }
+
+            deleteDigit() {
+                this.playSound('tiki');
+                if(navigator.vibrate) navigator.vibrate(40);
+                this.session.code = this.session.code.slice(0, -1);
+                this.updateCodeDisplay();
+            }
+
+            clearDigits() {
+                this.playSound('tiki');
+                if(navigator.vibrate) navigator.vibrate(40);
+                this.session.code = '';
+                this.updateCodeDisplay();
+            }
+
+            updateCodeDisplay() {
+                const display = document.getElementById('code-display');
+                display.textContent = this.session.code || '--------';
+                display.style.color = this.session.code ? 'var(--text-dark)' : '#DADCE0';
+            }
+
+            // --- ESCÁNER INLINE CON MODO ENFOQUE ---
+            async toggleScanner(e) {
+                if(e) e.stopPropagation();
+                this.playSound('click');
+                
+                if (this.isScanning) {
+                    this.closeScanner();
+                    return;
+                }
+
+                document.getElementById('numpad-wrapper').classList.remove('open');
+                this.isScanning = true;
+
+                const wrapper = document.getElementById('scanner-flex-wrapper');
+                const container = document.getElementById('code-input-container');
+                const overlay = document.getElementById('global-overlay');
+                const floatBtn = document.getElementById('floating-scan-btn');
+                const video = document.getElementById('mini-scanner-video');
+                const display = document.getElementById('code-display');
+                const guide = document.getElementById('scanner-guide');
+                const toggleBtn = document.getElementById('toggle-scanner-btn');
+
+                wrapper.classList.add('scanner-active');
+                container.classList.add('scanner-active');
+                overlay.classList.add('active');
+                floatBtn.style.display = 'flex';
+                floatBtn.classList.remove('success');
+                floatBtn.innerHTML = '<i class="fas fa-camera"></i> Escanear';
+                
+                display.style.display = 'none';
+                video.style.display = 'block';
+                guide.style.display = 'block';
+                
+                toggleBtn.innerHTML = '<i class="fas fa-times"></i>';
+                toggleBtn.style.background = 'var(--danger)';
+
+                try {
+                    this.scannerStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'environment', advanced: [{ focusMode: 'macro' }] }
+                    });
+                    video.srcObject = this.scannerStream;
+                } catch (err) {
+                    this.showToast('Error al abrir cámara', 'error');
+                    this.closeScanner();
+                }
+            }
+
+            async executeScan() {
+                if (this.scannedCode) {
+                    this.confirmScanner();
+                    return;
+                }
+
+                this.playSound('shutter');
+                if(navigator.vibrate) navigator.vibrate(50);
+
+                const video = document.getElementById('mini-scanner-video');
+                const frozenImg = document.getElementById('scanner-frozen-img');
+                const flash = document.getElementById('scanner-flash');
+                const overlay = document.getElementById('scanner-overlay');
+                const floatBtn = document.getElementById('floating-scan-btn');
+
+                // Efecto Flash
+                flash.style.display = 'block';
+                flash.style.opacity = '1';
+                setTimeout(() => { flash.style.opacity = '0'; setTimeout(()=>flash.style.display='none', 100); }, 50);
+
+                // Congelar Imagen
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                frozenImg.src = canvas.toDataURL('image/jpeg');
+                frozenImg.style.display = 'block';
+                video.style.display = 'none';
+
+                overlay.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                overlay.style.display = 'flex';
+
+                // Procesar OCR sobre la imagen congelada
+                if ('TextDetector' in window) {
+                    try {
+                        const detector = new TextDetector();
+                        const texts = await detector.detect(canvas);
+                        let found = false;
+                        for (const text of texts) {
+                            const match = text.rawValue.match(/\d{8}/);
+                            if (match) {
+                                this.processScannedCode(match[0]);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) this.handleScanFail();
+                    } catch(err) {
+                        this.handleScanFail();
+                    }
+                } else {
+                    this.fallbackScan(canvas);
+                }
+            }
+
+            loadScript(src) {
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = src;
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }
+
+            async fallbackScan(canvas) {
+                try {
+                    if (!window.Tesseract) {
+                        await this.loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+                    }
+                    const result = await Tesseract.recognize(canvas, 'eng');
+                    const match = result.data.text.match(/\d{8}/);
+                    if (match) {
+                        this.processScannedCode(match[0]);
+                    } else {
+                        this.handleScanFail();
+                    }
+                } catch (err) {
+                    this.handleScanFail();
+                }
+            }
+
+            processScannedCode(code) {
+                const overlay = document.getElementById('scanner-overlay');
+                const floatBtn = document.getElementById('floating-scan-btn');
+                
+                overlay.textContent = code;
+                overlay.style.display = 'flex';
+                
+                floatBtn.classList.add('success');
+                floatBtn.innerHTML = '<i class="fas fa-check"></i> Confirmar';
+                
+                this.scannedCode = code;
+                if(navigator.vibrate) navigator.vibrate([50, 50]);
+            }
+
+            handleScanFail() {
+                this.showToast('No se detectaron 8 dígitos', 'error');
+                // Descongelar y restaurar
+                document.getElementById('scanner-frozen-img').style.display = 'none';
+                document.getElementById('mini-scanner-video').style.display = 'block';
+                document.getElementById('scanner-overlay').style.display = 'none';
+            }
+
+            confirmScanner() {
+                this.playSound('click');
+                if (this.scannedCode) {
+                    this.session.code = this.scannedCode;
+                    this.updateCodeDisplay();
+                }
+                this.closeScanner();
+            }
+
+            closeScanner() {
+                this.isScanning = false;
+                this.scannedCode = null;
+                
+                if (this.scannerStream) {
+                    this.scannerStream.getTracks().forEach(t => t.stop());
+                    this.scannerStream = null;
+                }
+
+                document.getElementById('scanner-flex-wrapper').classList.remove('scanner-active');
+                document.getElementById('code-input-container').classList.remove('scanner-active');
+                document.getElementById('global-overlay').classList.remove('active');
+                document.getElementById('floating-scan-btn').style.display = 'none';
+                
+                document.getElementById('mini-scanner-video').style.display = 'none';
+                document.getElementById('scanner-frozen-img').style.display = 'none';
+                document.getElementById('scanner-overlay').style.display = 'none';
+                document.getElementById('scanner-guide').style.display = 'none';
+                document.getElementById('code-display').style.display = 'block';
+                
+                const toggleBtn = document.getElementById('toggle-scanner-btn');
+                toggleBtn.innerHTML = '<i class="fas fa-camera"></i>';
+                toggleBtn.style.background = 'var(--primary)';
+            }
+
+            // --- CARPETA LOCAL ---
+            async selectDirectory(forceChange = false) {
+                this.playSound('click');
+                if (!window.showDirectoryPicker) {
+                    this.showToast('Navegador no soporta carpeta automática.', 'error');
+                    return;
+                }
+                try {
+                    this.dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                    const tx = this.db.transaction('settings', 'readwrite');
+                    tx.objectStore('settings').put({ id: 'dirHandle', handle: this.dirHandle });
+                    this.showToast('Carpeta vinculada correctamente');
+                    this.cleanupOldPhotos();
+                } catch (e) { }
+            }
+
+            async verifyDirectoryPermission() {
+                if (!this.dirHandle) {
+                    return new Promise((resolve) => {
+                        const tx = this.db.transaction(['settings'], 'readonly');
+                        const req = tx.objectStore('settings').get('dirHandle');
+                        req.onsuccess = async () => {
+                            if (req.result && req.result.handle) {
+                                this.dirHandle = req.result.handle;
+                                try {
+                                    const perm = await this.dirHandle.queryPermission({ mode: 'readwrite' });
+                                    if (perm === 'granted') {
+                                        resolve(true);
+                                    } else {
+                                        const requestPerm = await this.dirHandle.requestPermission({ mode: 'readwrite' });
+                                        resolve(requestPerm === 'granted');
+                                    }
+                                } catch(e) { resolve(false); }
+                            } else resolve(false);
+                        };
+                        req.onerror = () => resolve(false);
+                    });
+                } else {
+                    try {
+                        const perm = await this.dirHandle.queryPermission({ mode: 'readwrite' });
+                        if (perm === 'granted') return true;
+                        return (await this.dirHandle.requestPermission({ mode: 'readwrite' })) === 'granted';
+                    } catch(e) { return false; }
+                }
+            }
+
+            async cleanupOldPhotos() {
+                if (!this.dirHandle) return;
+                try {
+                    const now = Date.now();
+                    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+                    for await (const entry of this.dirHandle.values()) {
+                        if (entry.kind === 'file' && entry.name.endsWith('.jpg')) {
+                            const file = await entry.getFile();
+                            if (now - file.lastModified > THIRTY_DAYS_MS) {
+                                await this.dirHandle.removeEntry(entry.name);
+                            }
+                        }
+                    }
+                } catch (err) {}
+            }
+
+            // --- SESIONES PENDIENTES ---
+            async checkAndRestorePendingSession() {
+                try {
+                    const tx = this.db.transaction(['photos'], 'readonly');
+                    const store = tx.objectStore('photos');
+                    const countReq = store.count();
+                    
+                    countReq.onsuccess = () => {
+                        if (countReq.result > 0) {
+                            this.session.code = this.getStorage('session_code') || '';
+                            this.session.type = this.getStorage('session_type') || 'Pedido';
+                            this.session.phrase = this.getStorage('session_phrase') || 'entregado correctamente';
+                            
+                            this.showLoading(true, "Restaurando captura en curso...");
+                            
+                            const getAllReq = store.getAll();
+                            getAllReq.onsuccess = async () => {
+                                this.photos = getAllReq.result.map(item => ({
+                                    id: item.id, blob: item.blob, url: URL.createObjectURL(item.blob), isProcessing: false
+                                }));
+                                this.showLoading(false);
+                                this.goToGallery();
+                            };
+                        }
+                    };
+                } catch (e) {}
+            }
+
+            renderPendingSessions() {
+                const tx = this.db.transaction('pending_sessions', 'readonly');
+                const req = tx.objectStore('pending_sessions').getAll();
+                req.onsuccess = () => {
+                    const sessions = req.result.reverse();
+                    const container = document.getElementById('pending-sessions-list');
+                    
+                    if (sessions.length === 0) {
+                        container.innerHTML = '';
+                        return;
+                    }
+
+                    let html = `<label style="font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 5px;">Sesiones Pendientes (${sessions.length}/5)</label>`;
+                    
+                    sessions.forEach(s => {
+                        html += `
+                            <div class="history-card" onclick="app.resumePendingSession('${s.id}')" style="position: relative; overflow: hidden; border-left: 4px solid var(--primary);">
+                                <div style="flex: 1;">
+                                    <strong>${s.type} ${s.code}</strong>
+                                    <small>${s.photos.length} foto(s) • ${new Date(s.date).toLocaleString('es-PE', { hour:'2-digit', minute:'2-digit' })}</small>
+                                </div>
+                                <button onclick="app.deletePendingSession('${s.id}', event)" style="background: var(--danger); color: white; border: none; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(217,48,37,0.3);">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+                    container.innerHTML = html;
+                };
+            }
+
+            async checkCodeInPending(code) {
+                return new Promise((resolve) => {
+                    const tx = this.db.transaction('pending_sessions', 'readonly');
+                    const req = tx.objectStore('pending_sessions').getAll();
+                    req.onsuccess = () => {
+                        const found = req.result.find(s => s.code === code);
+                        resolve(found);
+                    };
+                });
+            }
+
+            async getPendingCount() {
+                return new Promise((resolve) => {
+                    const tx = this.db.transaction('pending_sessions', 'readonly');
+                    const req = tx.objectStore('pending_sessions').count();
+                    req.onsuccess = () => resolve(req.result);
+                });
+            }
+
+            async savePendingSession() {
+                return new Promise((resolve) => {
+                    const sessionToSave = {
+                        id: Date.now().toString(),
+                        code: this.session.code,
+                        type: this.session.type,
+                        phrase: this.session.phrase,
+                        photos: this.photos.map(p => p.blob),
+                        date: Date.now()
+                    };
+                    const tx = this.db.transaction(['pending_sessions', 'photos'], 'readwrite');
+                    tx.objectStore('pending_sessions').add(sessionToSave);
+                    tx.objectStore('photos').clear(); 
+                    tx.oncomplete = () => {
+                        this.photos.forEach(p => { if(p.url) URL.revokeObjectURL(p.url); });
+                        this.photos = [];
+                        resolve();
+                    };
+                });
+            }
+
+            async resumePendingSession(id) {
+                this.playSound('click');
+                this.showLoading(true, "Cargando sesión...");
+                const tx = this.db.transaction(['pending_sessions', 'photos'], 'readwrite');
+                const pendingStore = tx.objectStore('pending_sessions');
+                const photoStore = tx.objectStore('photos');
+                
+                const req = pendingStore.get(id);
+                req.onsuccess = () => {
+                    const sessionData = req.result;
+                    if (!sessionData) return this.showLoading(false);
+                    
+                    this.session.code = sessionData.code;
+                    this.session.type = sessionData.type;
+                    this.session.phrase = sessionData.phrase;
+                    this.setStorage('session_code', this.session.code);
+                    this.setStorage('session_type', this.session.type);
+                    this.setStorage('session_phrase', this.session.phrase);
+                    
+                    photoStore.clear();
+                    this.photos = [];
+                    
+                    let addedCount = 0;
+                    sessionData.photos.forEach(blob => {
+                        const addReq = photoStore.add({ blob });
+                        addReq.onsuccess = (e) => {
+                            this.photos.push({ id: e.target.result, blob, url: URL.createObjectURL(blob), isProcessing: false });
+                            addedCount++;
+                            if (addedCount === sessionData.photos.length) {
+                                pendingStore.delete(id);
+                                this.showLoading(false);
+                                this.openCameraView();
+                            }
+                        };
+                    });
+                };
+            }
+
+            deletePendingSession(id, event) {
+                event.stopPropagation();
+                this.playSound('error');
+                if (confirm('¿Estás seguro de que deseas eliminar esta sesión? Las fotos tomadas se perderán.')) {
+                    const tx = this.db.transaction('pending_sessions', 'readwrite');
+                    tx.objectStore('pending_sessions').delete(id);
+                    tx.oncomplete = () => {
+                        this.renderPendingSessions();
+                        this.showToast('Sesión eliminada');
+                    };
+                }
+            }
+
+            // --- INICIO DE SESIÓN NUEVA ---
+            async startSession(isHD) {
+                this.playSound('click');
+                if (this.session.code.length === 0) {
+                    this.playSound('error');
+                    this.showToast('Ingresa un código válido', 'error');
+                    return;
+                }
+
+                const existingSession = await this.checkCodeInPending(this.session.code);
+                if (existingSession) {
+                    this.playSound('error');
+                    if (confirm(`⚠️ ALERTA: Tienes una sesión PENDIENTE con el código #${this.session.code}.\n\n¿Deseas reanudarla en lugar de crear una nueva?`)) {
+                        this.resumePendingSession(existingSession.id);
+                        return;
+                    } else {
+                        return; 
+                    }
+                }
+
+                if (window.showDirectoryPicker) {
+                    let hasPermission = await this.verifyDirectoryPermission();
+                    if (!hasPermission) {
+                        this.showToast('Requiere permisos de guardado', 'info');
+                        await this.selectDirectory();
+                    } else {
+                        this.cleanupOldPhotos();
+                    }
+                }
+
+                this.setStorage('lastType', this.session.type);
+                this.setStorage('lastPhrase', document.getElementById('custom-phrase').value);
+
+                this.session.phrase = document.getElementById('custom-phrase').value;
+                this.setStorage('session_code', this.session.code);
+                this.setStorage('session_type', this.session.type);
+                this.setStorage('session_phrase', this.session.phrase);
+
+                this.hdMode = isHD;
+                document.getElementById('hd-btn').classList.toggle('active', this.hdMode);
+
+                await this.clearDB(); 
+                this.photos = [];
+                this.currentZoom = 1;
+                this.openCameraView();
+            }
+
+            selectType(type, btn) {
+                this.playSound('click');
+                if(!btn) return;
+                this.session.type = type;
+                document.querySelectorAll('.type-option').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+
+            // --- ZOOM TÁCTIL (Pinch-to-zoom) ---
+            setupZoomListeners() {
+                const preview = document.getElementById('camera-preview');
+                preview.addEventListener('touchstart', (e) => {
+                    if (e.touches.length === 2) {
+                        this.initialDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                    }
+                }, { passive: false });
+
+                preview.addEventListener('touchmove', async (e) => {
+                    if (e.touches.length === 2 && this.initialDistance) {
+                        e.preventDefault(); 
+                        const currentDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                        const scale = currentDistance / this.initialDistance;
+                        
+                        if (this.stream) {
+                            const track = this.stream.getVideoTracks()[0];
+                            const capabilities = track.getCapabilities();
+                            if (capabilities.zoom) {
+                                const min = capabilities.zoom.min;
+                                const max = capabilities.zoom.max;
+                                let newZoom = this.currentZoom * scale;
+                                newZoom = Math.max(min, Math.min(newZoom, max));
+                                
+                                try {
+                                    await track.applyConstraints({ advanced: [{ zoom: newZoom }] });
+                                    this.currentZoom = newZoom;
+                                } catch (err) {}
+                            }
+                        }
+                        this.initialDistance = currentDistance;
+                    }
+                }, { passive: false });
+            }
+
+            // --- VISOR PANTALLA COMPLETA SWIPE ---
+            setupSwipeListeners() {
+                const touchArea = document.getElementById('fs-touch-area');
+                touchArea.addEventListener('touchstart', e => {
+                    this.touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+                touchArea.addEventListener('touchend', e => {
+                    const touchEndX = e.changedTouches[0].screenX;
+                    const deltaX = this.touchStartX - touchEndX;
+                    if (deltaX > 50) this.nextFullscreen();
+                    else if (deltaX < -50) this.prevFullscreen();
+                }, { passive: true });
+            }
+
+            openFullscreenViewer(index, mode = 'current') {
+                this.playSound('click');
+                if (mode === 'current') {
+                    this.fsUrls = this.photos.filter(p => !p.isProcessing).map(p => p.url);
+                }
+                
+                this.fsIndex = index;
+                document.getElementById('fullscreen-viewer').style.display = 'flex';
+                this.updateFullscreenImg();
+            }
+
+            updateFullscreenImg() {
+                const img = document.getElementById('fs-img');
+                const counter = document.getElementById('fs-counter');
+                img.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    img.src = this.fsUrls[this.fsIndex];
+                    img.style.transform = 'scale(1)';
+                }, 50);
+                counter.textContent = `${this.fsIndex + 1} / ${this.fsUrls.length}`;
+            }
+
+            nextFullscreen() {
+                if (this.fsIndex < this.fsUrls.length - 1) {
+                    this.playSound('click');
+                    this.fsIndex++;
+                    this.updateFullscreenImg();
+                }
+            }
+
+            prevFullscreen() {
+                if (this.fsIndex > 0) {
+                    this.playSound('click');
+                    this.fsIndex--;
+                    this.updateFullscreenImg();
+                }
+            }
+
+            closeFullscreenViewer() {
+                this.playSound('click');
+                document.getElementById('fullscreen-viewer').style.display = 'none';
+                document.getElementById('fs-img').src = '';
+            }
+
+            // --- CÁMARA ---
+            async openCameraView() {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('gallery-screen').style.display = 'none';
+                document.getElementById('camera-app').style.display = 'block';
+
+                document.getElementById('camera-code-display').textContent = this.session.code;
+                document.getElementById('camera-type-display').textContent = this.session.type;
+                
+                this.updateCameraUI();
+                await this.initCamera();
+            }
+
+            async initCamera() {
+                if (this.stream) this.stream.getTracks().forEach(t => t.stop());
+                const constraints = { 
+                    video: { 
+                        facingMode: this.facingMode, 
+                        width: { ideal: this.hdMode ? 2560 : 1920 }, 
+                        height: { ideal: this.hdMode ? 1440 : 1080 },
+                        frameRate: { ideal: 30 }
+                    } 
+                };
+                try {
+                    this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    document.getElementById('video').srcObject = this.stream;
+                    const track = this.stream.getVideoTracks()[0];
+                    if (track.getCapabilities().zoom) this.currentZoom = track.getSettings().zoom || 1;
+                    if (track.getCapabilities().torch && this.flashMode === 'torch') {
+                        track.applyConstraints({ advanced: [{ torch: true }] }).catch(()=>{});
+                    }
+                } catch (e) {
+                    this.playSound('error');
+                    this.showToast('Error de cámara', 'error');
+                }
+            }
+
+            toggleHD() {
+                this.playSound('click');
+                this.hdMode = !this.hdMode;
+                document.getElementById('hd-btn').classList.toggle('active', this.hdMode);
+                this.initCamera();
+            }
+
+            async toggleFlash() {
+                this.playSound('click');
+                if (!this.stream) return;
+                const track = this.stream.getVideoTracks()[0];
+                if (!track.getCapabilities().torch) return this.showToast('Flash no disponible');
+                
+                if (this.flashMode === 'off') {
+                    this.flashMode = 'torch';
+                    document.getElementById('flash-btn').innerHTML = '<i class="fas fa-lightbulb"></i>';
+                    document.getElementById('flash-btn').classList.add('active');
+                    await track.applyConstraints({ advanced: [{ torch: true }] });
+                } else {
+                    this.flashMode = 'off';
+                    document.getElementById('flash-btn').innerHTML = '<i class="fas fa-bolt" style="opacity:0.4"></i>';
+                    document.getElementById('flash-btn').classList.remove('active');
+                    await track.applyConstraints({ advanced: [{ torch: false }] });
+                }
+            }
+
+            flipCamera() {
+                this.playSound('click');
+                this.facingMode = this.facingMode === 'environment' ? 'user' : 'environment';
+                this.initCamera();
+            }
+
+            async takePhoto() {
+                this.playSound('shutter');
+
+                const video = document.getElementById('video');
+                const canvas = document.getElementById('canvas');
+                
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                
+                if (this.facingMode === 'user') { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+                
+                ctx.filter = 'saturate(115%) contrast(105%)';
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                
+                ctx.drawImage(video, 0, 0);
+                
+                ctx.filter = 'none';
+                
+                this.drawWatermark(ctx, canvas.width, canvas.height);
+                
+                // DESTELLO INMEDIATO PARA AVISAR QUE YA SE TOMÓ LA FOTO
+                const flash = document.getElementById('flash-overlay');
+                flash.style.opacity = '1';
+                setTimeout(() => flash.style.opacity = '0', 100);
+                
+                // INDICADOR DE CARGA INMEDIATO EN LA MINIATURA
+                const tempId = 'temp_' + Date.now();
+                this.photos.push({ id: tempId, url: null, isProcessing: true });
+                this.updateCameraUI();
+                
+                // PROCESAMIENTO ASÍNCRONO DEL BLOB
+                canvas.toBlob(async (blob) => {
+                    const tempUrl = URL.createObjectURL(blob);
+                    
+                    // Actualizar el objeto temporal con la imagen real
+                    const photoIndex = this.photos.findIndex(p => p.id === tempId);
+                    if (photoIndex !== -1) {
+                        this.photos[photoIndex].blob = blob;
+                        this.photos[photoIndex].url = tempUrl;
+                        this.photos[photoIndex].isProcessing = false;
+                        this.updateCameraUI();
+                    }
+
+                    if (this.dirHandle) {
+                        try {
+                            const now = new Date();
+                            const pad = (n) => String(n).padStart(2, '0');
+                            const dateStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+                            const filename = `${this.session.code}_${dateStr}.jpg`;
+                            
+                            const fileHandle = await this.dirHandle.getFileHandle(filename, { create: true });
+                            const writable = await fileHandle.createWritable();
+                            await writable.write(blob);
+                            await writable.close();
+                        } catch (err) {}
+                    }
+
+                    const photoData = { blob: blob };
+                    const tx = this.db.transaction(['photos'], 'readwrite');
+                    const store = tx.objectStore('photos');
+                    const request = store.add(photoData);
+                    
+                    request.onsuccess = () => {
+                        if (photoIndex !== -1) {
+                            this.photos[photoIndex].id = request.result;
+                        }
+                    };
+                }, 'image/jpeg', 1.0);
+            }
+
+            drawWatermark(ctx, width, height) {
+                const now = new Date();
+                const text1 = `${this.session.type.toUpperCase()} ${this.session.code}`;
+                const text2 = `${now.toLocaleDateString('es-PE')} ${now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}`;
+                
+                const baseSize = Math.min(width, height);
+                const sizeL = Math.max(16, Math.floor(baseSize * 0.025));
+                const sizeS = Math.max(12, Math.floor(baseSize * 0.018));
+                const pad = Math.floor(baseSize * 0.025);
+                
+                ctx.font = `bold ${sizeL}px sans-serif`;
+                const w1 = ctx.measureText(text1).width;
+                ctx.font = `${sizeS}px sans-serif`;
+                const w2 = ctx.measureText(text2).width;
+                
+                const bgW = Math.max(w1, w2) + (pad * 1.5);
+                const bgH = (sizeL * 1.3 * 2) + (pad * 0.8);
+                const bgX = pad - (pad * 0.5);
+                const bgY = height - pad - bgH + (pad * 0.3);
+                
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.beginPath(); ctx.roundRect(bgX, bgY, bgW, bgH, 8); ctx.fill();
+                
+                ctx.fillStyle = '#FFF';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'bottom';
+                ctx.font = `bold ${sizeL}px sans-serif`;
+                ctx.fillText(text1, pad, height - pad - (sizeL * 1.3) + (sizeL * 0.2));
+                
+                ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                ctx.font = `${sizeS}px sans-serif`;
+                ctx.fillText(text2, pad, height - pad);
+            }
+
+            updateCameraUI() {
+                const container = document.getElementById('camera-thumbnails');
+                container.innerHTML = '';
+                this.photos.forEach((p, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'thumb';
+                    if (p.isProcessing) {
+                        div.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.2);"><i class="fas fa-spinner fa-spin" style="color:white; font-size: 20px;"></i></div>`;
+                    } else {
+                        div.innerHTML = `<img src="${p.url}">`;
+                        div.onclick = () => this.openFullscreenViewer(idx, 'current');
+                    }
+                    container.appendChild(div);
+                });
+                container.scrollLeft = container.scrollWidth;
+                document.getElementById('to-gallery-btn').disabled = this.photos.length === 0;
+            }
+
+            // --- GALERÍA Y COMPARTIR ---
+            goToGallery() {
+                this.playSound('click');
+                if (this.stream) this.stream.getTracks().forEach(t => t.stop());
+                
+                document.getElementById('camera-app').style.display = 'none';
+                document.getElementById('gallery-screen').style.display = 'flex';
+                document.getElementById('gallery-subtitle').textContent = `${this.photos.length} foto(s) del ${this.session.type} ${this.session.code}`;
+                
+                const msgField = document.getElementById('review-message');
+                msgField.value = `${this.session.type} manual ${this.session.phrase}\n${this.session.code}`;
+                
+                this.renderGalleryGrid();
+            }
+
+            renderGalleryGrid() {
+                const grid = document.getElementById('gallery-grid');
+                grid.innerHTML = '';
+                this.photos.forEach((photo, index) => {
+                    if (photo.isProcessing) return;
+                    const div = document.createElement('div');
+                    div.className = 'photo-card';
+                    div.onclick = () => this.openFullscreenViewer(index, 'current');
+                    div.innerHTML = `
+                        <img src="${photo.url}">
+                        <button class="delete-photo-btn" onclick="app.deletePhoto(${index}, event)"><i class="fas fa-trash"></i></button>
+                    `;
+                    grid.appendChild(div);
+                });
+                if(this.photos.length === 0) this.backToCamera();
+            }
+
+            deletePhoto(index, event) {
+                event.stopPropagation();
+                this.playSound('error');
+                const photo = this.photos[index];
+                const tx = this.db.transaction(['photos'], 'readwrite');
+                tx.objectStore('photos').delete(photo.id);
+                URL.revokeObjectURL(photo.url);
+                this.photos.splice(index, 1);
+                this.renderGalleryGrid();
+            }
+
+            backToCamera() { 
+                this.playSound('click');
+                this.openCameraView(); 
+            }
+
+            async executeShare() {
+                if (this.photos.length === 0) return;
+                this.playSound('click');
+                this.showLoading(true, "Procesando envío...");
+                const finalMessage = document.getElementById('review-message').value;
+                
+                try {
+                    try {
+                        await navigator.clipboard.writeText(finalMessage);
+                        this.showToast("Mensaje copiado. Pégalo al enviar.", "success");
+                    } catch (err) {}
+
+                    if (navigator.share && navigator.canShare) {
+                        const files = this.photos.map((p, i) => new File([p.blob], `Evidencia_${this.session.code}_${i+1}.jpg`, { type: 'image/jpeg' }));
+                        const shareData = { files };
+                        if (navigator.canShare(shareData)) {
+                            await navigator.share(shareData);
+                            this.finalizeAndReset();
+                            return;
+                        }
+                    }
+                    const text = encodeURIComponent(finalMessage);
+                    window.open(`https://wa.me/?text=${text}`, '_blank');
+                    this.finalizeAndReset();
+                } catch (e) {
+                    this.showLoading(false);
+                }
+            }
+
+            // --- HISTORIAL Y REINICIO ---
+            async finalizeAndReset() {
+                const record = {
+                    code: this.session.code,
+                    type: this.session.type,
+                    date: new Date().toISOString(),
+                    photoCount: this.photos.length
+                };
+                const txHistory = this.db.transaction('history', 'readwrite');
+                txHistory.objectStore('history').add(record);
+
+                await this.clearDB();
+                
+                this.removeStorage('session_code');
+                this.removeStorage('session_type');
+                this.removeStorage('session_phrase');
+                
+                this.photos.forEach(p => { if(p.url) URL.revokeObjectURL(p.url); });
+                this.photos = [];
+                
+                this.hdMode = false;
+                this.flashMode = 'off';
+                document.getElementById('hd-btn').classList.remove('active');
+                document.getElementById('flash-btn').innerHTML = '<i class="fas fa-bolt" style="opacity:0.4"></i>';
+                document.getElementById('flash-btn').classList.remove('active');
+                if (this.stream) {
+                    const track = this.stream.getVideoTracks()[0];
+                    if (track && track.getCapabilities().torch) {
+                        track.applyConstraints({ advanced: [{ torch: false }] }).catch(()=>{});
+                    }
+                }
+
+                setTimeout(() => {
+                    this.showLoading(false);
+                    this.showToast("Envío exitoso", "success");
+                    
+                    document.getElementById('gallery-screen').style.display = 'none';
+                    document.getElementById('login-screen').style.display = 'flex';
+                    
+                    this.renderPendingSessions();
+                    
+                    this.session.code = '';
+                    this.updateCodeDisplay();
+                }, 800);
+            }
+
+            openHistory() {
+                this.playSound('click');
+                const tx = this.db.transaction('history', 'readonly');
+                const req = tx.objectStore('history').getAll();
+                req.onsuccess = () => {
+                    const history = req.result.reverse(); 
+                    const list = document.getElementById('history-list');
+                    if (history.length === 0) {
+                        list.innerHTML = `<div style="text-align:center; padding: 40px 20px; color: var(--text-secondary);">Sin envíos recientes.</div>`;
+                    } else {
+                        // Agrupar por fecha
+                        const grouped = {};
+                        history.forEach(h => {
+                            const d = new Date(h.date);
+                            const dateStr = d.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' });
+                            if (!grouped[dateStr]) grouped[dateStr] = [];
+                            grouped[dateStr].push(h);
+                        });
+
+                        let html = '';
+                        const todayStr = new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' });
+
+                        for (const [date, items] of Object.entries(grouped)) {
+                            const isTodayGroup = date === todayStr;
+                            html += `<div class="history-date-header">${isTodayGroup ? 'Hoy' : date}</div>`;
+                            
+                            items.forEach(h => {
+                                const isCaso = h.type === 'Caso';
+                                html += `
+                                <div class="history-card ${isCaso ? 'caso' : ''}">
+                                    <div style="display:flex; align-items:center; gap:12px;">
+                                        <input type="checkbox" class="history-cb" value="${h.code}" data-type="${h.type}" ${isTodayGroup ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--primary);">
+                                        <div>
+                                            <strong>${h.type} <span onclick="app.copySingleCode('${h.code}', '${h.type}')" style="cursor:pointer; text-decoration:underline; color:var(--primary);">${h.code}</span></strong>
+                                            <small>${new Date(h.date).toLocaleTimeString('es-PE', { hour:'2-digit', minute:'2-digit' })}</small>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; gap:8px; align-items:center;">
+                                        <button onclick="app.viewHistoryPhotos('${h.code}', '${h.date}')" class="history-badge" style="border:none; cursor:pointer;">${h.photoCount} <i class="fas fa-camera"></i></button>
+                                        <button onclick="app.deleteHistoryRecord(${h.id}, '${h.code}', '${h.date}', event)" style="background:var(--danger); color:white; border:none; border-radius:8px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 4px rgba(217,48,37,0.2);"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>`;
+                            });
+                        }
+                        list.innerHTML = html;
+                    }
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('history-screen').style.display = 'flex';
+                };
+            }
+
+            closeHistory() {
+                this.playSound('click');
+                document.getElementById('history-screen').style.display = 'none';
+                document.getElementById('login-screen').style.display = 'flex';
+            }
+
+            async viewHistoryPhotos(code, dateIso) {
+                this.playSound('click');
+                let hasPerm = await this.verifyDirectoryPermission();
+                if (!hasPerm) {
+                    this.showToast('Selecciona la carpeta local primero', 'info');
+                    await this.selectDirectory();
+                    return;
+                }
+                this.showLoading(true, 'Cargando fotos...');
+                try {
+                    const targetDate = new Date(dateIso);
+                    const pad = (n) => String(n).padStart(2, '0');
+                    const datePrefix = `${targetDate.getFullYear()}-${pad(targetDate.getMonth()+1)}-${pad(targetDate.getDate())}`;
+                    
+                    let allUrls = [];
+                    let indexCount = 0;
+                    let html = '';
+
+                    for await (const entry of this.dirHandle.values()) {
+                        if (entry.kind === 'file' && entry.name.startsWith(`${code}_${datePrefix}`)) {
+                            const file = await entry.getFile();
+                            const url = URL.createObjectURL(file);
+                            allUrls.push(url);
+                            html += `<div onclick="app.openFullscreenViewer(${indexCount}, 'local')" style="aspect-ratio:3/4; border-radius:10px; overflow:hidden; border:1px solid #E8EAED; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.05);">
+                                        <img src="${url}" style="width:100%; height:100%; object-fit:cover;">
+                                     </div>`;
+                            indexCount++;
+                        }
+                    }
+                    
+                    this.fsUrls = allUrls;
+                    if (allUrls.length === 0) {
+                        this.showToast('No se encontraron fotos locales', 'error');
+                        this.showLoading(false);
+                        return;
+                    }
+
+                    document.getElementById('modal-history-grid').innerHTML = html;
+                    document.getElementById('modal-history-title').textContent = `Fotos de ${code}`;
+                    document.getElementById('modal-history-subtitle').textContent = targetDate.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' });
+                    document.getElementById('history-photo-modal').style.display = 'flex';
+                    this.showLoading(false);
+                } catch (e) {
+                    this.showLoading(false);
+                    this.showToast('Error al leer fotos', 'error');
+                }
+            }
+
+            closeHistoryModal() {
+                this.playSound('click');
+                document.getElementById('history-photo-modal').style.display = 'none';
+            }
+
+            async deleteHistoryRecord(id, code, dateIso, event) {
+                event.stopPropagation();
+                this.playSound('error');
+                if (confirm(`¿Eliminar el registro ${code} y sus fotos del almacenamiento local?`)) {
+                    this.showLoading(true, 'Eliminando...');
+                    
+                    const tx = this.db.transaction('history', 'readwrite');
+                    tx.objectStore('history').delete(id);
+                    
+                    if (this.dirHandle) {
+                        try {
+                            let hasPerm = await this.verifyDirectoryPermission();
+                            if (hasPerm) {
+                                const targetDate = new Date(dateIso);
+                                const pad = (n) => String(n).padStart(2, '0');
+                                const datePrefix = `${targetDate.getFullYear()}-${pad(targetDate.getMonth()+1)}-${pad(targetDate.getDate())}`;
+                                
+                                for await (const entry of this.dirHandle.values()) {
+                                    if (entry.kind === 'file' && entry.name.startsWith(`${code}_${datePrefix}`)) {
+                                        await this.dirHandle.removeEntry(entry.name);
+                                    }
+                                }
+                            }
+                        } catch(e) {}
+                    }
+                    
+                    this.showLoading(false);
+                    this.showToast('Registro eliminado');
+                    this.openHistory(); 
+                }
+            }
+
+            copySingleCode(code, type) {
+                this.playSound('click');
+                const finalCode = type === 'Caso' ? code + 'c' : code;
+                navigator.clipboard.writeText(finalCode).then(() => {
+                    this.showToast(`Código ${finalCode} copiado`);
+                });
+            }
+
+            copySelectedCodes() {
+                this.playSound('click');
+                const checkboxes = document.querySelectorAll('.history-cb:checked');
+                if (checkboxes.length === 0) {
+                    this.showToast('No hay códigos seleccionados', 'error');
+                    return;
+                }
+                const codes = Array.from(checkboxes).map(cb => {
+                    const code = cb.value;
+                    const type = cb.getAttribute('data-type');
+                    return type === 'Caso' ? code + 'c' : code;
+                });
+                navigator.clipboard.writeText(codes.join('\n')).then(() => {
+                    this.showToast(`${codes.length} códigos copiados`);
+                });
+            }
+
+            // --- UTILIDADES ---
+            async clearDB() {
+                return new Promise((resolve) => {
+                    const tx = this.db.transaction(['photos'], 'readwrite');
+                    tx.objectStore('photos').clear();
+                    tx.oncomplete = () => resolve();
+                });
+            }
+
+            async goHomeFromCamera() {
+                this.playSound('click');
+                if (this.photos.length > 0) {
+                    const pendingCount = await this.getPendingCount();
+                    if (pendingCount >= 5) {
+                        this.playSound('error');
+                        this.showToast('Límite de 5 sesiones. Envía una antes de pausar otra.', 'error');
+                        return; 
+                    }
+                    await this.savePendingSession();
+                }
+                
+                if(this.stream) {
+                    const track = this.stream.getVideoTracks()[0];
+                    if (track && track.getCapabilities().torch) {
+                        track.applyConstraints({ advanced: [{ torch: false }] }).catch(()=>{});
+                    }
+                    this.stream.getTracks().forEach(t=>t.stop());
+                }
+                document.getElementById('camera-app').style.display = 'none';
+                document.getElementById('login-screen').style.display = 'flex';
+                this.renderPendingSessions();
+            }
+
+            async confirmReset() {
+                this.playSound('error');
+                if(confirm("¿Eliminar todas las capturas pendientes y resetear la aplicación?")) {
+                    await this.clearDB();
+                    const tx = this.db.transaction('pending_sessions', 'readwrite');
+                    tx.objectStore('pending_sessions').clear();
+                    
+                    this.removeStorage('session_code');
+                    this.removeStorage('session_type');
+                    this.removeStorage('session_phrase');
+                    this.photos.forEach(p => { if(p.url) URL.revokeObjectURL(p.url); });
+                    this.photos = [];
+                    this.renderPendingSessions();
+                    this.showToast("Aplicación reseteada");
+                    this.session.code = '';
+                    this.updateCodeDisplay();
+                }
+            }
+
+            showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                document.getElementById('toast-message').textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            }
+
+            showLoading(show, text = "Cargando...") {
+                document.getElementById('loading-text').textContent = text;
+                document.getElementById('loading').classList.toggle('active', show);
+            }
+        }
+
+        const app = new ManualesCamApp();
+    </script>
+</body>
+</html>
